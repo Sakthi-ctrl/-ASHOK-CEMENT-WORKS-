@@ -404,7 +404,7 @@ export default function HomePage() {
             Ashok Cement Works • Readymade Compound Wall
           </p>
           <p>
-            2/2, Singarampillaiyar Koil Street, Chennai Salai, Kumbakonam – 612 002, Tamil Nadu. | Cell: 77087888086
+            2/2, Singarampillai Toppu, Chennai Road, Kumbakonam – 612 001. | Cell: 77087888086
           </p>
           <p className="text-[11px] text-slate-400 pt-1">
             Smart PWA Invoice Generator • Frontend-Only Architecture • Browser-Based PDF & Image Generator

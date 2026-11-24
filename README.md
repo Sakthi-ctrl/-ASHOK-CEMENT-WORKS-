@@ -141,7 +141,7 @@ npm start
 
 - **Company**: ASHOK CEMENT WORKS
 - **Specialty**: READYMADE COMPOUND WALL
-- **Address**: 2/2, Singarampillaiyar Koil Street, Chennai Salai, Kumbakonam – 612 002, Tamil Nadu.
+- **Address**: 2/2, Singarampillai Toppu, Chennai Road, Kumbakonam – 612 001.
 - **Proprietor**: A. Arun Kumar
 - **Contact**: Cell : 77087888086
 

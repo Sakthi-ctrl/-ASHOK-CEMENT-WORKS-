@@ -3,8 +3,8 @@ import { AdditionalCharge, InvoiceData, MeasurementRow } from '@/types/invoice';
 export const COMPANY_DETAILS = {
   name: 'ASHOK CEMENT WORKS',
   subTitle: 'READYMADE COMPOUND WALL',
-  addressLine1: '2/2, Singarampillaiyar Koil Street,',
-  addressLine2: 'Chennai Salai, Kumbakonam – 612 002, Tamil Nadu.',
+  addressLine1: '2/2, Singarampillai Toppu, Chennai Road,',
+  addressLine2: 'Kumbakonam – 612 001',
   phone: '77087888086',
   proprietor: 'A. Arun Kumar',
   role: 'Proprietor',
