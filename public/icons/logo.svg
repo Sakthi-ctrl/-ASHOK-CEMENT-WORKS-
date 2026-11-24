@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E78D1" />
+      <stop offset="100%" stop-color="#073B78" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Circle -->
+  <circle cx="100" cy="100" r="94" fill="url(#blueGrad)" stroke="#FFFFFF" stroke-width="4" filter="url(#shadow)" />
+  
+  <!-- Inner White Ring -->
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="6,3" opacity="0.8" />
+  
+  <!-- Outer Diamond (Rhombus) -->
+  <rect x="52" y="52" width="96" height="96" rx="6" fill="#FFFFFF" transform="rotate(45 100 100)" />
+  
+  <!-- Inner Diamond -->
+  <rect x="58" y="58" width="84" height="84" rx="4" fill="url(#blueGrad)" transform="rotate(45 100 100)" />
+
+  <!-- Center Diamond White Core -->
+  <rect x="66" y="66" width="68" height="68" rx="2" fill="#FFFFFF" transform="rotate(45 100 100)" />
+
+  <!-- Stylized "C" Symbol -->
+  <path d="M 125 78 
+           C 117 68, 102 64, 88 68 
+           C 72 74, 64 88, 64 100 
+           C 64 112, 72 126, 88 132 
+           C 102 136, 117 132, 125 122 
+           L 114 112 
+           C 108 118, 99 121, 91 118 
+           C 81 114, 77 106, 77 100 
+           C 77 94, 81 86, 91 82 
+           C 99 79, 108 82, 114 88 
+           Z" 
+        fill="#073B78" stroke="#0866B5" stroke-width="1.5" stroke-linejoin="round" />
+
+  <!-- Decorative small dots / stars on 4 corners -->
+  <circle cx="100" cy="20" r="3.5" fill="#FFFFFF" />
+  <circle cx="100" cy="180" r="3.5" fill="#FFFFFF" />
+  <circle cx="20" cy="100" r="3.5" fill="#FFFFFF" />
+  <circle cx="180" cy="100" r="3.5" fill="#FFFFFF" />
+</svg>
