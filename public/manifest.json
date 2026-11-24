@@ -3,6 +3,7 @@
   "short_name": "Ashok Cement",
   "description": "Smart Invoice Generator for Ashok Cement Works - Readymade Compound Wall",
   "start_url": "/",
+  "scope": "/",
   "id": "/",
   "display": "standalone",
   "background_color": "#F5F8FC",
@@ -11,7 +12,7 @@
   "icons": [
     {
       "src": "/brand-logo.png",
-      "sizes": "512x512",
+      "sizes": "any",
       "type": "image/png",
       "purpose": "any maskable"
     },

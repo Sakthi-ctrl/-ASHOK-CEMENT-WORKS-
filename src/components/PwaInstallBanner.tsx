@@ -1,9 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Download, HelpCircle, Smartphone, X } from 'lucide-react';
+import {
+  Check,
+  CheckCircle2,
+  Smartphone,
+  X,
+} from 'lucide-react';
 
-interface BeforeInstallPromptEvent extends Event {
+export interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
   readonly userChoice: Promise<{
     outcome: 'accepted' | 'dismissed';
@@ -12,147 +17,282 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
-export const PwaInstallBanner: React.FC<{ forceShowModal?: boolean; onCloseModal?: () => void }> = ({
-  forceShowModal,
-  onCloseModal,
+interface PwaInstallBannerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  deferredPrompt: BeforeInstallPromptEvent | null;
+  onPromptTriggered?: () => void;
+}
+
+export const PwaInstallBanner: React.FC<PwaInstallBannerProps> = ({
+  isOpen,
+  onClose,
+  deferredPrompt,
+  onPromptTriggered,
 }) => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [showIosGuide, setShowIosGuide] = useState(false);
+  const [deviceTab, setDeviceTab] = useState<'android' | 'ios'>('android');
+  const [installSuccess, setInstallSuccess] = useState(false);
 
   useEffect(() => {
-    // Check if running as standalone PWA
-    if (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true
-    ) {
-      setIsInstalled(true);
-    }
-
-    // Detect iOS
+    // Auto-detect device type
     const ua = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(ua);
-    setIsIos(isIosDevice);
-
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => console.log('ServiceWorker registered:', reg.scope))
-        .catch((err) => console.warn('ServiceWorker registration failed:', err));
+    if (/iphone|ipad|ipod/.test(ua)) {
+      setDeviceTab('ios');
+    } else {
+      setDeviceTab('android');
     }
-
-    // Catch beforeinstallprompt event for Chromium / Android
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-    };
   }, []);
 
-  const handleInstallClick = async () => {
-    if (isInstalled) {
-      alert('Ashok Cement Works App is already installed on your device!');
-      return;
-    }
-
+  const handleNativeInstall = async () => {
     if (deferredPrompt) {
       try {
         await deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === 'accepted') {
-          setIsInstalled(true);
-          setDeferredPrompt(null);
+          setInstallSuccess(true);
+          if (onPromptTriggered) onPromptTriggered();
+          setTimeout(() => {
+            onClose();
+            setInstallSuccess(false);
+          }, 2500);
         }
       } catch (err) {
-        console.error('Install prompt error:', err);
+        console.error('PWA install prompt error:', err);
       }
-    } else if (isIos) {
-      setShowIosGuide(true);
-    } else {
-      setShowIosGuide(true);
     }
   };
 
-  const closeGuide = () => {
-    setShowIosGuide(false);
-    if (onCloseModal) onCloseModal();
-  };
+  if (!isOpen) return null;
 
   return (
-    <>
-      {/* iOS or Android Instruction Modal */}
-      {(showIosGuide || forceShowModal) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-[#0866B5]" />
-                <h3 className="font-bold text-sm text-[#14233B]">
-                  Install Mobile App
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={closeGuide}
-                className="text-slate-400 hover:text-slate-600 p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in no-print">
+      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+        {/* Modal Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white shadow-xs p-1 border border-slate-200 flex-shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand-logo.png"
+                alt="Ashok Cement Works"
+                className="w-full h-full object-contain"
+              />
             </div>
-
-            <div className="space-y-3 text-xs sm:text-sm text-slate-700">
-              <p className="font-semibold text-[#073B78]">
-                Install Ashok Cement Works on your home screen for quick, offline access:
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base text-[#14233B]">
+                Install Mobile App
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Save Ashok Cement Works to your Home Screen
               </p>
+            </div>
+          </div>
 
-              {isIos ? (
-                <ol className="list-decimal list-inside space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-                  <li>
-                    Tap the <strong className="text-[#0866B5]">Share</strong> button in Safari's bottom toolbar (square with upward arrow).
-                  </li>
-                  <li>
-                    Scroll down and tap <strong className="text-[#0866B5]">Add to Home Screen</strong> (+ icon).
-                  </li>
-                  <li>
-                    Tap <strong className="text-[#0866B5]">Add</strong> in the top-right corner.
-                  </li>
-                </ol>
-              ) : (
-                <ol className="list-decimal list-inside space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-                  <li>
-                    Tap the browser menu <strong className="text-[#0866B5]">⋮</strong> (three dots in Chrome).
-                  </li>
-                  <li>
-                    Select <strong className="text-[#0866B5]">Install App</strong> or <strong className="text-[#0866B5]">Add to Home screen</strong>.
-                  </li>
-                  <li>
-                    Confirm <strong className="text-[#0866B5]">Install</strong> to launch as a standalone application.
-                  </li>
-                </ol>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-4 sm:p-5 space-y-4">
+          {installSuccess ? (
+            <div className="p-6 text-center space-y-2">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                <Check className="w-6 h-6 stroke-[3]" />
+              </div>
+              <h4 className="font-bold text-slate-800 text-base">
+                App Installed Successfully!
+              </h4>
+              <p className="text-xs text-slate-500">
+                Ashok Cement Works is now accessible from your mobile home screen.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* If browser supports 1-click native install */}
+              {deferredPrompt && (
+                <div className="p-3.5 bg-[#EAF3FC] border border-[#0866B5]/30 rounded-2xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span className="text-xs font-bold text-[#073B78] block">
+                        Quick 1-Click Install Ready!
+                      </span>
+                      <span className="text-[11px] text-slate-600">
+                        Tap below to install directly onto your device.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleNativeInstall}
+                      className="px-4 py-2 bg-[#0866B5] hover:bg-[#073B78] text-white text-xs font-extrabold rounded-xl shadow-md transition active:scale-95 whitespace-nowrap"
+                    >
+                      Install Now
+                    </button>
+                  </div>
+                </div>
               )}
 
-              <p className="text-[11px] text-slate-500 italic">
-                ✓ Works 100% offline with zero data consumption. No app store login needed.
-              </p>
-            </div>
+              {/* Device Selector Tabs */}
+              <div className="flex bg-slate-100 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setDeviceTab('android')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
+                    deviceTab === 'android'
+                      ? 'bg-white text-[#0866B5] shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Android / Chrome
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeviceTab('ios')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
+                    deviceTab === 'ios'
+                      ? 'bg-white text-[#0866B5] shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  iPhone / Safari
+                </button>
+              </div>
 
+              {/* Step-by-Step Instructions */}
+              {deviceTab === 'android' ? (
+                <div className="space-y-2.5 text-xs">
+                  <p className="font-bold text-[#073B78]">
+                    Follow these 3 simple steps in Chrome to add to your Home Screen:
+                  </p>
+
+                  <div className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="w-6 h-6 rounded-full bg-[#0866B5] text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                      1
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Tap Chrome Menu <span className="text-[#0866B5] font-black">⋮</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Tap the three dots in the top-right corner of your browser.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="w-6 h-6 rounded-full bg-[#0866B5] text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                      2
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Tap <span className="text-[#0866B5] font-bold">&quot;Add to Home screen&quot;</span> or <span className="text-[#0866B5] font-bold">&quot;Install app&quot;</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Scroll down the menu list to find this option.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="w-6 h-6 rounded-full bg-[#0866B5] text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                      3
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Tap <span className="text-[#0866B5] font-bold">&quot;Install&quot;</span> or <span className="text-[#0866B5] font-bold">&quot;Add&quot;</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        The Ashok Cement Works app will appear on your phone screen!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2.5 text-xs">
+                  <p className="font-bold text-[#073B78]">
+                    Follow these 3 steps in Safari on iPhone / iPad:
+                  </p>
+
+                  <div className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="w-6 h-6 rounded-full bg-[#0866B5] text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                      1
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Tap the Share Button <span className="text-[#0866B5] font-bold">⎋</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Located at the bottom of your Safari browser bar (square with upward arrow).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="w-6 h-6 rounded-full bg-[#0866B5] text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                      2
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Tap <span className="text-[#0866B5] font-bold">&quot;Add to Home Screen&quot;</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Scroll down the sharing options until you see the (+) icon.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="w-6 h-6 rounded-full bg-[#0866B5] text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                      3
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Tap <span className="text-[#0866B5] font-bold">&quot;Add&quot;</span> in the top right
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Ashok Cement Works will be pinned like a native app on your home screen.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Offline highlight */}
+              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 text-[11px] text-slate-600">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>
+                  <strong>Full Offline Support:</strong> Once installed, create and print bills anywhere even without internet.
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Modal Footer Actions */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-2">
+          {deferredPrompt && !installSuccess ? (
             <button
               type="button"
-              onClick={closeGuide}
-              className="mt-4 w-full py-2 bg-[#0866B5] hover:bg-[#073B78] text-white font-bold text-xs rounded-xl shadow-sm transition"
+              onClick={handleNativeInstall}
+              className="flex-1 py-2.5 bg-[#0866B5] hover:bg-[#073B78] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition"
             >
-              Got it
+              📲 Install App Directly
             </button>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2.5 bg-[#0866B5] hover:bg-[#073B78] text-white font-bold text-xs sm:text-sm rounded-xl shadow-sm transition"
+            >
+              Close
+            </button>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 };

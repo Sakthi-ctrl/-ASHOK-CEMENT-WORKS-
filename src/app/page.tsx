@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Header } from '@/components/Header';
 import { HomeHero } from '@/components/HomeHero';
 import { CustomerEditor } from '@/components/CustomerEditor';
@@ -23,8 +23,44 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<'split' | 'a4' | 'editor'>('split');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showInstallModal, setShowInstallModal] = useState<boolean>(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showSampleBillModal, setShowSampleBillModal] = useState<boolean>(false);
   const [hasStartedEditing, setHasStartedEditing] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Register Service Worker
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((reg) => console.log('SW registered:', reg.scope))
+        .catch((err) => console.warn('SW failed:', err));
+    }
+
+    // Capture PWA install prompt
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          setDeferredPrompt(null);
+          return;
+        }
+      } catch (err) {
+        console.error('Install prompt error:', err);
+      }
+    }
+    setShowInstallModal(true);
+  };
 
   const editorTopRef = useRef<HTMLDivElement>(null);
 
@@ -83,12 +119,14 @@ export default function HomePage() {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onInstallClick={() => setShowInstallModal(true)}
+        onInstallClick={handleInstallClick}
       />
 
       <PwaInstallBanner
-        forceShowModal={showInstallModal}
-        onCloseModal={() => setShowInstallModal(false)}
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+        deferredPrompt={deferredPrompt}
+        onPromptTriggered={() => setDeferredPrompt(null)}
       />
 
       {/* Main Content Area */}
@@ -96,7 +134,7 @@ export default function HomePage() {
         {/* Home / Hero Dashboard Overview */}
         <HomeHero
           onStartInvoice={startInvoiceFromHero}
-          onOpenInstall={() => setShowInstallModal(true)}
+          onOpenInstall={handleInstallClick}
           onOpenSampleBill={() => setShowSampleBillModal(true)}
         />
 
