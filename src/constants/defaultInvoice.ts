@@ -119,16 +119,28 @@ export const getTodayDateString = (): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+export const getNextBillNumber = (current: string, fallbackCounter: number = 1): string => {
+  if (!current) return `ACW-${String(fallbackCounter + 1).padStart(3, '0')}`;
+  const match = current.match(/^(.*?)(\d+)$/);
+  if (match) {
+    const prefix = match[1];
+    const numStr = match[2];
+    const nextNum = parseInt(numStr, 10) + 1;
+    return `${prefix}${String(nextNum).padStart(numStr.length, '0')}`;
+  }
+  return `ACW-${String(fallbackCounter + 1).padStart(3, '0')}`;
+};
+
 export const getInitialInvoiceData = (billSeqNumber: number = 1): InvoiceData => ({
   customer: {
     billNumber: `ACW-${String(billSeqNumber).padStart(3, '0')}`,
     billDate: getTodayDateString(),
-    customerName: 'S. Shanmugam',
-    address: 'No. 14, Kamarajar Nagar, Chennai Road, Kumbakonam',
-    phone: '9842100000',
+    customerName: '',
+    address: '',
+    phone: '',
   },
   measurements: getInitialMeasurements(),
   additionalCharges: getInitialAdditionalCharges(),
-  advancePayment: 30000,
+  advancePayment: '',
   notes: [...DEFAULT_NOTES],
 });

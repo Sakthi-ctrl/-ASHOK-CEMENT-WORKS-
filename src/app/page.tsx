@@ -10,7 +10,7 @@ import { PaymentEditor } from '@/components/PaymentEditor';
 import { InvoicePreview } from '@/components/InvoicePreview';
 import { ActionToolbar } from '@/components/ActionToolbar';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
-import { getInitialInvoiceData } from '@/constants/defaultInvoice';
+import { getInitialInvoiceData, getNextBillNumber, getTodayDateString } from '@/constants/defaultInvoice';
 import { CustomerDetails, InvoiceData, MeasurementRow, AdditionalCharge } from '@/types/invoice';
 import { calculateInvoiceTotals, formatIndianRupee } from '@/utils/formatters';
 import { Eye, FileImage, Sparkles, X } from 'lucide-react';
@@ -91,11 +91,22 @@ export default function HomePage() {
     setInvoice((prev) => ({ ...prev, advancePayment }));
   };
 
-  // Create New Invoice
+  // Create New Invoice manually
   const handleNewInvoice = () => {
+    const currentBill = invoice.customer.billNumber || `ACW-${String(billCounter).padStart(3, '0')}`;
+    const nextBillNumber = getNextBillNumber(currentBill, billCounter);
     const nextCount = billCounter + 1;
     setBillCounter(nextCount);
-    setInvoice(getInitialInvoiceData(nextCount));
+    setInvoice({
+      ...getInitialInvoiceData(nextCount),
+      customer: {
+        billNumber: nextBillNumber,
+        billDate: getTodayDateString(),
+        customerName: '',
+        address: '',
+        phone: '',
+      },
+    });
     setActiveTab('edit');
     setHasStartedEditing(true);
 
@@ -103,6 +114,26 @@ export default function HomePage() {
     if (editorTopRef.current) {
       editorTopRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Automatic increment and new invoice creation on PDF download
+  const handlePdfDownloaded = () => {
+    const currentBill = invoice.customer.billNumber || `ACW-${String(billCounter).padStart(3, '0')}`;
+    const nextBillNumber = getNextBillNumber(currentBill, billCounter);
+    const nextCount = billCounter + 1;
+
+    setBillCounter(nextCount);
+
+    setInvoice({
+      ...getInitialInvoiceData(nextCount),
+      customer: {
+        billNumber: nextBillNumber,
+        billDate: getTodayDateString(),
+        customerName: '',
+        address: '',
+        phone: '',
+      },
+    });
   };
 
   const startInvoiceFromHero = () => {
@@ -144,6 +175,7 @@ export default function HomePage() {
             billNumber={invoice.customer.billNumber}
             onNewInvoice={handleNewInvoice}
             onOpenOriginalImage={() => setShowSampleBillModal(true)}
+            onPdfDownloaded={handlePdfDownloaded}
           />
         </div>
 
@@ -372,11 +404,13 @@ export default function HomePage() {
             onClick={() => {
               setActiveTab('preview');
               setTimeout(() => {
-                import('@/utils/exportInvoice').then(({ downloadInvoicePdf }) => {
-                  downloadInvoicePdf(
+                import('@/utils/exportInvoice').then(async ({ downloadInvoicePdf }) => {
+                  const billNo = invoice.customer.billNumber || 'Bill';
+                  await downloadInvoicePdf(
                     'ashok-invoice-printable',
-                    `Ashok-Cement-Invoice-${invoice.customer.billNumber || 'Bill'}`
+                    `Ashok-Cement-Invoice-${billNo}`
                   );
+                  handlePdfDownloaded();
                 });
               }, 200);
             }}

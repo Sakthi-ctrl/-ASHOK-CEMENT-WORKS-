@@ -98,11 +98,11 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice }) => {
             <div className="h-0.5 bg-[#0866B5] w-full mt-0.5 rounded-sm"></div>
           </div>
 
-          {/* Customer / Bill / Date Bar */}
-          <div className="flex items-center justify-between py-1 px-1">
+          {/* Subheader Bar: Invoice No, Pill Badge, Date */}
+          <div className="flex items-center justify-between py-1.5 px-2 bg-slate-50/80 rounded-lg border border-slate-200">
             <div className="flex items-center gap-1.5 text-sm sm:text-base font-bold text-[#A31D1D]">
-              <span>Customer :</span>
-              <span className="text-[#073B78] font-bold text-xs sm:text-sm">
+              <span>Invoice No :</span>
+              <span className="text-[#073B78] font-black text-xs sm:text-sm">
                 #{invoice.customer.billNumber || 'ACW-001'}
               </span>
             </div>
@@ -117,36 +117,6 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice }) => {
               <span className="text-[#14233B] font-semibold text-xs sm:text-sm">
                 {formatDateToPrint(invoice.customer.billDate)}
               </span>
-            </div>
-          </div>
-
-          {/* Customer Name & Address Box */}
-          <div className="mt-2 border-2 border-[#0866B5] rounded-xl p-2.5 sm:p-3 bg-white">
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-xs sm:text-sm font-bold text-[#073B78] whitespace-nowrap">
-                Customer Name :
-              </span>
-              <div className="flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                <span className="text-xs sm:text-sm font-bold text-[#14233B]">
-                  {invoice.customer.customerName || '—'}
-                </span>
-                {invoice.customer.phone && (
-                  <span className="text-xs text-gray-500 ml-2">
-                    (Ph: {invoice.customer.phone})
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-              <span className="text-xs sm:text-sm font-bold text-[#073B78] whitespace-nowrap">
-                Address :
-              </span>
-              <div className="flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                <span className="text-xs sm:text-sm text-gray-800">
-                  {invoice.customer.address || '—'}
-                </span>
-              </div>
             </div>
           </div>
 

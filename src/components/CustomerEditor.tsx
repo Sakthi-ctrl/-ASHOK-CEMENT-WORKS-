@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { CustomerDetails } from '@/types/invoice';
-import { Calendar, Hash, MapPin, Phone, User } from 'lucide-react';
+import { Calendar, Hash, Sparkles } from 'lucide-react';
 
 interface CustomerEditorProps {
   customer: CustomerDetails;
@@ -19,22 +19,29 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({ customer, onChan
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5">
-      <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-        <div className="w-8 h-8 rounded-lg bg-[#EAF3FC] text-[#0866B5] flex items-center justify-center font-bold">
-          <User className="w-4 h-4" />
+      <div className="flex items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-[#EAF3FC] text-[#0866B5] flex items-center justify-center font-bold">
+            <Hash className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-[#14233B]">
+              Invoice & Date Information
+            </h2>
+            <p className="text-xs text-slate-500">
+              Customer name and address removed • Auto-increments on PDF download
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-sm sm:text-base font-bold text-[#14233B]">
-            Customer & Bill Information
-          </h2>
-          <p className="text-xs text-slate-500">
-            Enter bill number, date, and customer contact details
-          </p>
-        </div>
+
+        <span className="text-[11px] font-bold text-[#0866B5] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full hidden sm:inline-flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-[#0866B5]" />
+          Auto-Increment Ready
+        </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        {/* Bill Number */}
+        {/* Bill / Invoice Number */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
             Bill / Invoice Number *
@@ -48,16 +55,19 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({ customer, onChan
               value={customer.billNumber}
               onChange={(e) => handleChange('billNumber', e.target.value)}
               placeholder="e.g. ACW-001"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0866B5] focus:border-[#0866B5] outline-none transition"
+              className="w-full pl-9 pr-3 py-2 text-sm font-bold text-[#073B78] border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0866B5] focus:border-[#0866B5] outline-none transition bg-slate-50/50"
               required
             />
           </div>
+          <p className="text-[10px] text-slate-400 mt-1">
+            Automatically increments to next number when PDF is downloaded.
+          </p>
         </div>
 
         {/* Bill Date */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Bill Date *
+            Invoice Date *
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -71,67 +81,12 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({ customer, onChan
               required
             />
           </div>
-        </div>
-
-        {/* Customer Name */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Customer Name *
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <User className="w-4 h-4" />
-            </div>
-            <input
-              type="text"
-              value={customer.customerName}
-              onChange={(e) => handleChange('customerName', e.target.value)}
-              placeholder="Enter customer full name"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0866B5] focus:border-[#0866B5] outline-none transition"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Customer Phone (Optional) */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Customer Contact / Mobile
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Phone className="w-4 h-4" />
-            </div>
-            <input
-              type="tel"
-              value={customer.phone || ''}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              placeholder="e.g. 98421 00000"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0866B5] focus:border-[#0866B5] outline-none transition"
-            />
-          </div>
-        </div>
-
-        {/* Customer Address */}
-        <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Site / Delivery Address *
-          </label>
-          <div className="relative">
-            <div className="absolute top-2.5 left-3 flex items-center pointer-events-none text-slate-400">
-              <MapPin className="w-4 h-4" />
-            </div>
-            <textarea
-              rows={2}
-              value={customer.address}
-              onChange={(e) => handleChange('address', e.target.value)}
-              placeholder="Enter installation site or customer address in Kumbakonam / nearby"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0866B5] focus:border-[#0866B5] outline-none transition resize-none"
-              required
-            />
-          </div>
+          <p className="text-[10px] text-slate-400 mt-1">
+            Defaults to today&apos;s date.
+          </p>
         </div>
       </div>
     </div>
   );
 };
+

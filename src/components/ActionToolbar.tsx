@@ -24,12 +24,14 @@ interface ActionToolbarProps {
   billNumber: string;
   onNewInvoice: () => void;
   onOpenOriginalImage?: () => void;
+  onPdfDownloaded?: () => void;
 }
 
 export const ActionToolbar: React.FC<ActionToolbarProps> = ({
   billNumber,
   onNewInvoice,
   onOpenOriginalImage,
+  onPdfDownloaded,
 }) => {
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -46,7 +48,12 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
 
       if (format === 'pdf') {
         await downloadInvoicePdf('ashok-invoice-printable', cleanFilename);
-        setSuccessMessage('PDF Downloaded successfully!');
+        setSuccessMessage(`✓ Invoice ${billNumber} Downloaded! Creating next invoice automatically...`);
+        if (onPdfDownloaded) {
+          setTimeout(() => {
+            onPdfDownloaded();
+          }, 800);
+        }
       } else if (format === 'png') {
         await downloadInvoicePng('ashok-invoice-printable', cleanFilename);
         setSuccessMessage('PNG Image saved!');
@@ -59,7 +66,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
       alert('Could not generate export. Please try again or use the Print button.');
     } finally {
       setDownloadingFormat(null);
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 4000);
     }
   };
 
